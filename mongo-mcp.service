@@ -1,0 +1,21 @@
+[Unit]
+Description=MongoDB MCP Server
+After=network.target
+Wants=mongodb.service
+
+[Service]
+User=torder
+Group=torder
+WorkingDirectory=/Users/torder/PycharmProjects/mongo-mcp-server
+Environment="PATH=/Users/torder/PycharmProjects/mongo-mcp-server/venv/bin"
+Environment="PYTHONPATH=/Users/torder/PycharmProjects/mongo-mcp-server"
+Environment="MONGODB_URL=mongodb://****:****@nas.rastalion.me:27017/mgmt_mysql?authSource=admin"
+ExecStart=/Users/torder/PycharmProjects/mongo-mcp-server/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 3000
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mongo-mcp
+
+[Install]
+WantedBy=multi-user.target

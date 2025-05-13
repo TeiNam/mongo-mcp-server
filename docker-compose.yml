@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  mongo-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mongo-mcp-server
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGODB_URL=mongodb://mongo:27017/admin
+      - TZ=Asia/Seoul
+    networks:
+      - mcp-network
+    volumes:
+      - ./:/app
+    depends_on:
+      - mongo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  mongo:
+    image: mongo:4.4
+    container_name: mongo-db
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+      - TZ=Asia/Seoul
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - mcp-network
+    command: mongod --auth
+
+networks:
+  mcp-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
+    driver: local
