@@ -16,7 +16,10 @@ from app.tools.registry import ToolRegistry
 
 # 환경 변수 로드
 load_dotenv()
+
+# 환경 변수에서 설정 가져오기
 database_url = os.getenv("MONGODB_URL", "mongodb://root:example@localhost:27017/admin")
+transport_type = os.getenv("MCP_TRANSPORT", "http").lower()
 
 # 수명 주기 관리자
 @asynccontextmanager
@@ -24,17 +27,23 @@ async def lifespan(app: FastAPI):
     """앱 수명 주기 관리"""
     # 시작 시 실행
     await connect_to_mongodb(database_url)
-    print("MongoDB MCP server running")
+    print(f"MongoDB MCP server running with {transport_type} transport")
     yield
     # 종료 시 실행
     await close_mongodb()
+    print("MongoDB MCP server shutdown complete")
 
 # FastAPI 앱 생성
-app = FastAPI(title="MongoDB MCP Server", lifespan=lifespan)
+app = FastAPI(
+    title="MongoDB MCP Server", 
+    description="MongoDB MCP Server for AI Agents",
+    version="0.1.0",
+    lifespan=lifespan
+)
 
 # FastMCP 인스턴스 생성
 mcp = FastMCP(
-    name="mongo-mcp",
+    name="mongodb-mcp-bridge",
     version="0.1.0"
 )
 
@@ -44,7 +53,12 @@ tool_registry = ToolRegistry()
 @app.get("/health")
 async def health_check():
     """상태 체크 엔드포인트"""
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "version": "0.1.0",
+        "transport": transport_type,
+        "database": database_url.split("@")[-1].split("/")[0]
+    }
 
 # 도구 등록
 for tool in tool_registry.get_all_tools():
@@ -61,9 +75,6 @@ for tool in tool_registry.get_all_tools():
                 print(f"도구 등록 성공: {tool.name}")
             else:
                 print(f"도구 실행 함수가 호출 가능한 객체가 아닙니다: {tool.name}, 타입: {type(tool.execute)}")
-                # 디버깅 정보 출력
-                print(f"도구 속성: {dir(tool)}")
-                print(f"execute 타입: {type(tool.execute)}")
         elif hasattr(mcp, 'register_tool'):
             if callable(tool.execute):
                 mcp.register_tool(
@@ -78,22 +89,18 @@ for tool in tool_registry.get_all_tools():
             print(f"도구 등록 메서드를 찾을 수 없습니다: {tool.name}")
     except Exception as e:
         print(f"도구 등록 중 오류: {e}")
-        # 오류 발생 시 메서드 시그니처 확인
         if hasattr(mcp, 'add_tool'):
             import inspect
             print(f"add_tool 메서드 시그니처: {inspect.signature(mcp.add_tool)}")
-            
-        # 도구 디버깅 정보 출력
-        try:
-            print(f"도구 정보: {tool.name}, 타입: {type(tool)}")
-            if hasattr(tool, 'execute'):
-                print(f"execute 타입: {type(tool.execute)}")
-        except:
-            pass
 
-# FastMCP 앱 연결 - FastMCP API 변경사항 적용
+# FastMCP 앱 연결 - 트랜스포트 타입에 따라 설정
 try:
     print("FastMCP 앱 연결 시도")
+    
+    if transport_type == "sse":
+        print("SSE 트랜스포트 모드로 설정됨")
+    else:
+        print("HTTP 트랜스포트 모드로 설정됨")
     
     # from_fastapi 메서드 사용 시도 (권장 방식)
     if hasattr(mcp, 'from_fastapi') and callable(mcp.from_fastapi):
@@ -139,9 +146,6 @@ try:
         else:
             print("주의: FastMCP 앱을 마운트할 수 없습니다.")
             print("커스텀 엔드포인트(/sse, /messages)를 통해 기능이 제공됩니다.")
-            
-        # 마운트 상태와 관계없이 커스텀 엔드포인트 사용 안내
-        print("참고: 커스텀 엔드포인트도 사용 가능 (/sse, /messages)")
 except Exception as e:
     print(f"FastMCP 앱 연결 중 오류: {e}")
     import traceback
@@ -207,6 +211,3 @@ async def messages_endpoint(request: Request):
             status_code=500,
             content={"error": f"Message processing error: {str(e)}"}
         )
-
-if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="0.0.0.0", port=3000, reload=True)

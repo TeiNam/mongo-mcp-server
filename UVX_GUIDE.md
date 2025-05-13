@@ -73,6 +73,12 @@ uvx register --file your-service-file.yml
 - **서비스 로그 보기**: `uvx logs mongo-mcp`
 - **등록된 모든 서비스 보기**: `uvx list`
 
+### 직접 실행 명령어
+
+- **기본 실행**: `uvx mongo-mcp-server`
+- **SSE 모드 실행**: `uvx mongo-mcp-server --transport=sse`
+- **MongoDB URL 지정**: `uvx mongo-mcp-server --mongodb-url="mongodb://user:pass@host:port/db"`
+
 ### 서비스 자동 시작 설정
 
 UVX 서비스를 시스템 부팅 시 자동으로 시작하도록 설정:

@@ -43,17 +43,16 @@ TEMP_SERVICE_FILE=$(mktemp)
 cat > "$TEMP_SERVICE_FILE" << EOF
 name: $SERVICE_NAME
 description: MongoDB MCP Server for AI Agents
-command: uvicorn
+command: mongo-mcp-server  # 여기를 mongo-mcp-server로 변경
 args:
-  - app.main:app
   - --host
   - 0.0.0.0
   - --port
   - $PORT
+  - --mongodb-url
+  - $MONGODB_URL
 cwd: $SCRIPT_DIR
 env:
-  MONGODB_URL: $MONGODB_URL
-  PORT: $PORT
   PYTHONPATH: $SCRIPT_DIR
   TZ: Asia/Seoul
 tags:

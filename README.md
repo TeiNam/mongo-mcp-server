@@ -25,9 +25,42 @@ MongoDB 데이터베이스와의 원활한 상호작용을 표준화된 프로�
 * 타입 힌트를 갖춘 쿼리 실행
 * 실시간 업데이트를 위한 SSE(Server-Sent Events) 지원
 
-## Quick Start
+## 빠른 시작
 
-### Python 사용
+### CLI 도구로 사용
+
+```bash
+# 저장소 복제
+git clone https://github.com/yourusername/mongo-mcp-server.git
+cd mongo-mcp-server
+
+# 개발 모드로 설치
+pip install -e .
+
+# 로컬에서 CLI 명령으로 실행
+mongo-mcp-server
+
+# SSE 트랜스포트로 실행
+mongo-mcp-server --transport=sse
+
+# MongoDB URL 지정
+mongo-mcp-server --mongodb-url="mongodb://username:password@hostname:port/dbname"
+
+# 도움말 보기
+mongo-mcp-server --help
+```
+
+### UVX를 통해 실행
+
+```bash
+# UVX가 설치된 경우
+uvx mongo-mcp-server
+
+# SSE 트랜스포트 모드
+uvx mongo-mcp-server --transport=sse
+```
+
+### Python 직접 실행
 
 ```bash
 # 저장소 복제
@@ -91,6 +124,7 @@ MONGODB_URL="mongodb://username:password@hostname:port/dbname?authSource=admin"
 
 # 선택 - 기본값 표시
 PORT=3000
+MCP_TRANSPORT=http  # 'http' 또는 'sse'
 ```
 
 ## API 엔드포인트
@@ -118,11 +152,9 @@ VS Code settings.json에 다음을 추가하세요:
     ],
     "servers": {
       "mongodb": {
-        "command": "uvicorn",
-        "args": ["app.main:app", "--host", "0.0.0.0", "--port", "3000"],
-        "env": {
-          "MONGODB_URL": "$(mongodbUri)"
-        }
+        "command": "mongo-mcp-server",
+        "args": ["--mongodb-url", "$(mongodbUri)"],
+        "env": {}
       }
     }
   }
@@ -199,11 +231,30 @@ from .documents.my_new_tool import MyNewTool
 self.register_tool(MyNewTool())
 ```
 
+### CLI 도구 설치 및 배포
+
+PyPI에 패키지로 등록하여 전역적으로 사용할 수 있습니다:
+
+```bash
+# setup.py 확인 후 빌드
+python setup.py sdist bdist_wheel
+
+# 패키지 업로드 (PyPI 계정 필요)
+twine upload dist/*
+
+# 전역 설치
+pip install mongodb-mcp-bridge
+
+# 어디서든 실행 가능
+mongodb-mcp-bridge
+```
+
 ## 문제 해결
 
-- **서버가 시작되지 않는 경우**: `docker-compose logs mongo-mcp` 또는 `sudo journalctl -u mongo-mcp -f`로 로그 확인
-- **MongoDB 연결 문제**: `MONGODB_URL`이 올바르고 접근 가능한지 확인
+- **서버가 시작되지 않는 경우**: `mongo-mcp-server --help`로 도움말 확인
+- **MongoDB 연결 문제**: `--mongodb-url` 파라미터가 올바른지 확인
 - **도구 실행 오류**: 도구 구현과 입력 매개변수 확인
+- **Docker 문제**: `docker-compose logs mongo-mcp`로 로그 확인
 
 ## Docker 구성
 
