@@ -1,7 +1,8 @@
 import asyncio
 import datetime
-from motor.motor_asyncio import AsyncIOMotorClient
+
 from bson import ObjectId
+from motor.motor_asyncio import AsyncIOMotorClient
 
 
 async def seed_database():

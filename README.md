@@ -11,12 +11,16 @@
 MongoDB 데이터베이스와의 원활한 상호작용을 표준화된 프로토콜로 제공하는 강력한 Model Context Protocol(MCP) 서버 구현체입니다.
 
 ## 작성자
+
 **Rastalion**
 
 ## 개요
-이 MCP 서버 구현체는 Model Context Protocol을 통해 MongoDB 데이터베이스와 상호작용할 수 있는 강력한 인터페이스를 제공합니다. 데이터베이스, 컬렉션 및 문서에 대한 작업을 async/await 패턴과 오류 처리를 통해 안정적으로 지원합니다.
+
+이 MCP 서버 구현체는 Model Context Protocol을 통해 MongoDB 데이터베이스와 상호작용할 수 있는 강력한 인터페이스를 제공합니다. 데이터베이스, 컬렉션 및 문서에 대한 작업을
+async/await 패턴과 오류 처리를 통해 안정적으로 지원합니다.
 
 ## 특징
+
 * MongoDB CRUD 작업 완벽 지원
 * MongoDB와의 안전한 연결 처리
 * 최적의 성능을 위한 비동기(async/await) 패턴
@@ -153,7 +157,10 @@ VS Code settings.json에 다음을 추가하세요:
     "servers": {
       "mongodb": {
         "command": "mongo-mcp-server",
-        "args": ["--mongodb-url", "$(mongodbUri)"],
+        "args": [
+          "--mongodb-url",
+          "$(mongodbUri)"
+        ],
         "env": {}
       }
     }
@@ -179,16 +186,16 @@ Claude 또는 다른 AI 어시스턴트를 위해 MCP 서버를 다음과 같이
 
 ## 사용 가능한 도구
 
-| 도구 이름 | 설명 |
-|-----------|-------------|
-| `listCollections` | 데이터베이스의 모든 사용 가능한 컬렉션 목록 조회 |
-| `find` | MongoDB 쿼리 구문을 사용하여 컬렉션의 문서 조회 |
-| `insertOne` | 컬렉션에 단일 문서 삽입 |
-| `updateOne` | 컬렉션에서 단일 문서 업데이트 |
-| `deleteOne` | 컬렉션에서 단일 문서 삭제 |
-| `indexes` | 컬렉션의 모든 인덱스 목록 조회 |
-| `createIndex` | 컬렉션에 새로운 인덱스 생성 |
-| `dropIndex` | 컬렉션에서 기존 인덱스 삭제 |
+| 도구 이름             | 설명                             |
+|-------------------|--------------------------------|
+| `listCollections` | 데이터베이스의 모든 사용 가능한 컬렉션 목록 조회    |
+| `find`            | MongoDB 쿼리 구문을 사용하여 컬렉션의 문서 조회 |
+| `insertOne`       | 컬렉션에 단일 문서 삽입                  |
+| `updateOne`       | 컬렉션에서 단일 문서 업데이트               |
+| `deleteOne`       | 컬렉션에서 단일 문서 삭제                 |
+| `indexes`         | 컬렉션의 모든 인덱스 목록 조회              |
+| `createIndex`     | 컬렉션에 새로운 인덱스 생성                |
+| `dropIndex`       | 컬렉션에서 기존 인덱스 삭제                |
 
 ## 고급 사용법
 
@@ -198,6 +205,7 @@ Claude 또는 다른 AI 어시스턴트를 위해 MCP 서버를 다음과 같이
 
 ```python
 from ..base.tool import BaseTool
+
 
 class MyNewTool(BaseTool):
     @property

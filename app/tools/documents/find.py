@@ -1,7 +1,8 @@
 import json
-from typing import Dict, Any, List, Optional
-from ...mongodb.client import db
+from typing import Dict, Any, Optional
+
 from ..base.tool import BaseTool, ToolParams
+from ...mongodb.client import db
 
 
 class FindParams(ToolParams):

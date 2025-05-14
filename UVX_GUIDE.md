@@ -23,6 +23,7 @@ chmod +x uvx-register.sh
 ```
 
 스크립트는 다음을 수행합니다:
+
 1. UVX가 설치되어 있는지 확인
 2. MongoDB URL 입력 요청 (기본값: mongodb://localhost:27017/admin)
 3. 서비스 포트 입력 요청 (기본값: 3000)
@@ -137,8 +138,8 @@ UVX를 통해 MongoDB MCP 서버를 AI 어시스턴트와 연동하려면:
 ```
 
 3. AI 어시스턴트에서 다음과 같이 접근:
-   - listCollections: 컬렉션 목록 조회
-   - find: 문서 검색 및 필터링
+    - listCollections: 컬렉션 목록 조회
+    - find: 문서 검색 및 필터링
 
 ## 관련 문서
 

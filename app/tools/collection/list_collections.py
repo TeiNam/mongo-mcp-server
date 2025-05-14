@@ -1,6 +1,7 @@
 from typing import Dict, Any
-from ...mongodb.client import db
+
 from ..base.tool import BaseTool, ToolParams
+from ...mongodb.client import db
 
 
 class ListCollectionsTool(BaseTool):

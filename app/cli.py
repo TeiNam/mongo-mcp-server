@@ -1,8 +1,8 @@
 import os
 import sys
+
 import click
 import uvicorn
-from pathlib import Path
 from dotenv import load_dotenv
 
 # 환경 변수 로드
@@ -12,6 +12,7 @@ load_dotenv()
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = 3000
 DEFAULT_MONGODB_URL = "mongodb://localhost:27017/admin"
+
 
 # CLI 그룹 정의
 @click.group(invoke_without_command=True)
@@ -36,25 +37,26 @@ def cli(ctx, transport, host, port, mongodb_url, mongodb_db):
         elif "MONGODB_URL" not in os.environ:
             os.environ["MONGODB_URL"] = DEFAULT_MONGODB_URL
             click.echo(f"Warning: Using default MongoDB URL: {DEFAULT_MONGODB_URL}")
-        
+
         if mongodb_db:
             os.environ["MONGODB_DB"] = mongodb_db
-            
+
         # 로그 출력
         click.echo(f"Starting MongoDB MCP Server with {transport} transport")
         click.echo(f"Server running at: http://{host}:{port}")
         click.echo(f"MCP Endpoint: http://{host}:{port}/mcp")
         click.echo(f"Health Check: http://{host}:{port}/health")
-        
+
         # SSE 모드에 따른 추가 메시지
         if transport == 'sse':
             click.echo(f"SSE Endpoint: http://{host}:{port}/sse")
             os.environ["MCP_TRANSPORT"] = "sse"
         else:
             os.environ["MCP_TRANSPORT"] = "http"
-        
+
         # 서버 시작
         uvicorn.run("app.main:app", host=host, port=port, log_level="info")
+
 
 @cli.command()
 def info():
@@ -77,6 +79,7 @@ def info():
     click.echo("  uvx mongo-mcp-server")
     click.echo("  uvx mongo-mcp-server --transport=sse")
 
+
 def main():
     """Entry point for the CLI."""
     try:
@@ -84,6 +87,7 @@ def main():
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

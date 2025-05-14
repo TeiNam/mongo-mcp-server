@@ -1,15 +1,13 @@
 import os
-import uvicorn
-from fastapi import FastAPI, Request, Response
-from fastapi.responses import JSONResponse
-from dotenv import load_dotenv
-from typing import Dict, Any, Optional
 from contextlib import asynccontextmanager
 
-# 올바른 fastmcp 임포트
-from fastmcp.server import FastMCP
+from dotenv import load_dotenv
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 # 서버용 SSE 트랜스포트 임포트
 from fastmcp.low_level.sse_server_transport import SseServerTransport
+# 올바른 fastmcp 임포트
+from fastmcp.server import FastMCP
 
 from app.mongodb.client import connect_to_mongodb, close_mongodb
 from app.tools.registry import ToolRegistry
@@ -20,6 +18,7 @@ load_dotenv()
 # 환경 변수에서 설정 가져오기
 database_url = os.getenv("MONGODB_URL", "mongodb://root:example@localhost:27017/admin")
 transport_type = os.getenv("MCP_TRANSPORT", "http").lower()
+
 
 # 수명 주기 관리자
 @asynccontextmanager
@@ -33,9 +32,10 @@ async def lifespan(app: FastAPI):
     await close_mongodb()
     print("MongoDB MCP server shutdown complete")
 
+
 # FastAPI 앱 생성
 app = FastAPI(
-    title="MongoDB MCP Server", 
+    title="MongoDB MCP Server",
     description="MongoDB MCP Server for AI Agents",
     version="0.1.0",
     lifespan=lifespan
@@ -50,6 +50,7 @@ mcp = FastMCP(
 # 도구 레지스트리 초기화
 tool_registry = ToolRegistry()
 
+
 @app.get("/health")
 async def health_check():
     """상태 체크 엔드포인트"""
@@ -59,6 +60,7 @@ async def health_check():
         "transport": transport_type,
         "database": database_url.split("@")[-1].split("/")[0]
     }
+
 
 # 도구 등록
 for tool in tool_registry.get_all_tools():
@@ -91,28 +93,29 @@ for tool in tool_registry.get_all_tools():
         print(f"도구 등록 중 오류: {e}")
         if hasattr(mcp, 'add_tool'):
             import inspect
+
             print(f"add_tool 메서드 시그니처: {inspect.signature(mcp.add_tool)}")
 
 # FastMCP 앱 연결 - 트랜스포트 타입에 따라 설정
 try:
     print("FastMCP 앱 연결 시도")
-    
+
     if transport_type == "sse":
         print("SSE 트랜스포트 모드로 설정됨")
     else:
         print("HTTP 트랜스포트 모드로 설정됨")
-    
+
     # from_fastapi 메서드 사용 시도 (권장 방식)
     if hasattr(mcp, 'from_fastapi') and callable(mcp.from_fastapi):
         # FastMCP 앱을 FastAPI 앱에 연결
         mcp.from_fastapi(app, prefix="/mcp")
         print("성공: from_fastapi 메서드로 FastMCP 앱 통합")
-        
+
     # 대체 방식: 필요한 앱 마운트
     else:
         # 앱 마운트 상태 추적
         apps_mounted = 0
-        
+
         # HTTP 앱 마운트
         if hasattr(mcp, 'http_app'):
             try:
@@ -121,7 +124,7 @@ try:
                 apps_mounted += 1
             except Exception as e:
                 print(f"HTTP 앱 마운트 실패: {e}")
-        
+
         # SSE 앱 마운트
         if hasattr(mcp, 'sse_app'):
             try:
@@ -130,7 +133,7 @@ try:
                 apps_mounted += 1
             except Exception as e:
                 print(f"SSE 앱 마운트 실패: {e}")
-                
+
         # 스트리밍 HTTP 앱 마운트
         if hasattr(mcp, 'streamable_http_app'):
             try:
@@ -139,7 +142,7 @@ try:
                 apps_mounted += 1
             except Exception as e:
                 print(f"스트리밍 HTTP 앱 마운트 실패: {e}")
-        
+
         # 앱 마운트 결과 요약
         if apps_mounted > 0:
             print(f"성공: {apps_mounted}개 FastMCP 앱 통합 완료")
@@ -149,7 +152,9 @@ try:
 except Exception as e:
     print(f"FastMCP 앱 연결 중 오류: {e}")
     import traceback
+
     traceback.print_exc()
+
 
 # SSE 엔드포인트
 @app.get("/sse")
@@ -181,6 +186,7 @@ async def sse_endpoint(request: Request):
             status_code=500,
             content={"error": f"SSE connection error: {str(e)}"}
         )
+
 
 # 메시지 엔드포인트
 @app.post("/messages")

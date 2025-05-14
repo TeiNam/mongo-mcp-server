@@ -1,7 +1,7 @@
-from typing import Dict, Any, List, Union
-import json
+from typing import Dict, Any
+
+from ..base.tool import BaseTool
 from ...mongodb.client import db
-from ..base.tool import BaseTool, ToolParams
 
 
 class CreateIndexTool(BaseTool):
